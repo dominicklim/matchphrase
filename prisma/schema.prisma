@@ -1,0 +1,57 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+
+model Player {
+  id String @id @default(cuid())
+  token String
+  puzzleAttempts PuzzleAttempt[]
+  puzzleRatings PuzzleRating[]
+}
+
+
+model Phrase {
+  id    String  @id  @default(cuid())
+  content      String
+  hints   String?
+  emojis EmojiPuzzle[]
+}
+
+model EmojiPuzzle {
+  id    String  @id  @default(cuid())
+  phraseId String
+  phrase Phrase @relation(fields: [phraseId], references: [id])
+  difficulty  Int @default(0)
+  emoji  String?
+  userAttempts PuzzleAttempt[]
+  userRatings PuzzleRating[]
+}
+
+model PuzzleRating {
+  id    String  @id  @default(cuid())
+  puzzleId String
+  puzzle EmojiPuzzle @relation(fields: [puzzleId], references: [id])
+  playerId String
+  player Player @relation(fields: [playerId], references: [id]) 
+  score Int @default(0)
+}
+
+model PuzzleAttempt {
+  id    Int     @id       @default(autoincrement())
+  playerId String
+  player   Player   @relation(fields: [playerId], references: [id])
+  puzzleId String
+  puzzle EmojiPuzzle @relation(fields: [puzzleId], references: [id])
+  duration Int
+  userInput String
+  order Int @default(0)
+  success Int @default(0)
+}
+
